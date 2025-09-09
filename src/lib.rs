@@ -1,6 +1,7 @@
 #![feature(
     decl_macro,
-    formatting_options
+    formatting_options,
+    nonzero_internals
 )]
 
 

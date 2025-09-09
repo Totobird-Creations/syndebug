@@ -1,5 +1,9 @@
 use crate::*;
 use core::fmt::{ self, Formatter };
+use core::num::{
+    NonZero,
+    ZeroablePrimitive
+};
 use std::borrow::Cow;
 
 
@@ -228,5 +232,17 @@ where
                 Ok(())
             }
         }
+    }
+}
+
+impl<T> SynDebug for NonZero<T>
+where
+    T : ZeroablePrimitive + SynDebug
+{
+    fn fmt(&self, f : &mut Formatter<'_>, const_like : bool) -> fmt::Result {
+        write!(f, "NonZero::new( ")?;
+        <T as SynDebug>::fmt(&self.get(), f, const_like)?;
+        write!(f, ", )")?;
+        Ok(())
     }
 }
