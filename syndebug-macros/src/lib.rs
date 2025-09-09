@@ -35,7 +35,7 @@ pub fn syn_debug(item : TokenStream) -> TokenStream {
         Ok(FoundCrate::Itself)     => quote!{ crate },
         Ok(FoundCrate::Name(crate_name)) => {
             let crate_ident = Ident::new(&crate_name, Span2::call_site());
-            quote!( #crate_ident::Something )
+            quote!( #crate_ident )
         },
         Err(_) => quote!{ ::syndebug }
     };
@@ -118,7 +118,7 @@ pub fn syn_debug(item : TokenStream) -> TokenStream {
         impl #impl_generics #found_crate::SynDebug for #item_ident #type_generics
         #where_clause
         {
-            fn fmt(&self, f : &mut Formatter<'_>) -> fmt::Result {
+            fn fmt(&self, f : &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 write!(f, #item_str)?;
                 #inner
                 Ok(())
