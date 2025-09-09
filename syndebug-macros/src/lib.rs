@@ -118,7 +118,7 @@ pub fn syn_debug(item : TokenStream) -> TokenStream {
         impl #impl_generics #found_crate::SynDebug for #item_ident #type_generics
         #where_clause
         {
-            fn fmt(&self, f : &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            fn fmt(&self, f : &mut ::core::fmt::Formatter<'_>, const_like : bool) -> ::core::fmt::Result {
                 write!(f, #item_str)?;
                 #inner
                 Ok(())
@@ -133,7 +133,7 @@ fn quote_fields_named(found_crate : &TokenStream2, named : impl IntoIterator<Ite
         let field_str = field_ident.to_string();
         quote!{
             write!(f, concat!(#field_str, " : "))?;
-            <#ty as #found_crate::SynDebug>::fmt(#access, f)?;
+            <#ty as #found_crate::SynDebug>::fmt(#access, f, const_like)?;
             write!(f, ", ")?;
         }
     });
@@ -146,7 +146,7 @@ fn quote_fields_named(found_crate : &TokenStream2, named : impl IntoIterator<Ite
 
 fn quote_fields_unnamed(found_crate : &TokenStream2, unnamed : impl IntoIterator<Item = (Type, TokenStream2)>) -> TokenStream2 {
     let fields = unnamed.into_iter().map(|(ty, access,)| quote!{
-        <#ty as #found_crate::SynDebug>::fmt(#access, f)?;
+        <#ty as #found_crate::SynDebug>::fmt(#access, f, const_like)?;
         write!(f, ", ")?;
     });
     quote!{
