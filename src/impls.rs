@@ -246,3 +246,11 @@ where
         Ok(())
     }
 }
+
+#[cfg(feature = "serde")]
+impl SynDebug for serde::de::IgnoredAny {
+    #[inline]
+    fn fmt(&self, f : &mut Formatter<'_>, _const_like : bool) -> fmt::Result {
+        write!(f, "IgnoredAny")
+    }
+}

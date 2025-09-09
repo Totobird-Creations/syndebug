@@ -3,6 +3,9 @@ name = "syndebug"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+serde = [ "dep:serde" ]
+
 [workspace]
 members = [ "syndebug-macros" ]
 
@@ -13,3 +16,8 @@ internal_features = "allow"
 
 [dependencies.syndebug-macros]
 path = "syndebug-macros"
+
+
+[dependencies.serde]
+version  = "1.0"
+optional = true
