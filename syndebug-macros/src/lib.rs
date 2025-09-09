@@ -67,45 +67,49 @@ pub fn syn_debug(item : TokenStream) -> TokenStream {
         },
 
         Data::Enum(DataEnum { variants, .. }) => {
-            let variants = variants.into_iter().map(|Variant { ident : variant_ident, fields, .. }| {
-                let variant_str = variant_ident.to_string();
-                match (fields) {
+            if (variants.is_empty()) {
+                quote!{ unsafe { ::core::hint::unreachable_unchecked(); } }
+            } else {
+                let variants = variants.into_iter().map(|Variant { ident : variant_ident, fields, .. }| {
+                    let variant_str = variant_ident.to_string();
+                    match (fields) {
 
-                    Fields::Named(FieldsNamed { named, .. }) => {
-                        let field_idents = named.iter().map(|Field { ident : field_ident, .. }| field_ident);
-                        let fields       = quote_fields_named(&found_crate,
-                            named.iter().map(|Field { ident : field_ident, ty, .. }| {
-                                let field_ident = field_ident.as_ref().unwrap();
-                                let access      = quote!{ #field_ident };
-                                (field_ident.clone(), ty.clone(), access,)
-                            })
-                        );
-                        quote!{ Self::#variant_ident { #( #field_idents , )* } => {
+                        Fields::Named(FieldsNamed { named, .. }) => {
+                            let field_idents = named.iter().map(|Field { ident : field_ident, .. }| field_ident);
+                            let fields       = quote_fields_named(&found_crate,
+                                named.iter().map(|Field { ident : field_ident, ty, .. }| {
+                                    let field_ident = field_ident.as_ref().unwrap();
+                                    let access      = quote!{ #field_ident };
+                                    (field_ident.clone(), ty.clone(), access,)
+                                })
+                            );
+                            quote!{ Self::#variant_ident { #( #field_idents , )* } => {
+                                write!(f, concat!("::", #variant_str))?;
+                                #fields
+                            } }
+                        },
+
+                        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
+                            let field_idents = (0..unnamed.len()).map(|i| Ident::new(&format!("f{i}"), Span2::call_site())).collect::<Vec<_>>();
+                            let fields       = quote_fields_unnamed(&found_crate,
+                                unnamed.iter().zip(field_idents.clone()).map(|(Field { ty, .. }, field_ident,)| {
+                                    (ty.clone(), quote!{ #field_ident })
+                                })
+                            );
+                            quote!{ Self::#variant_ident ( #( #field_idents , )* ) => {
+                                write!(f, concat!("::", #variant_str))?;
+                                #fields
+                            } }
+                        },
+
+                        Fields::Unit => quote!{ Self::#variant_ident => {
                             write!(f, concat!("::", #variant_str))?;
-                            #fields
                         } }
-                    },
 
-                    Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-                        let field_idents = (0..unnamed.len()).map(|i| Ident::new(&format!("f{i}"), Span2::call_site())).collect::<Vec<_>>();
-                        let fields       = quote_fields_unnamed(&found_crate,
-                            unnamed.iter().zip(field_idents.clone()).map(|(Field { ty, .. }, field_ident,)| {
-                                (ty.clone(), quote!{ #field_ident })
-                            })
-                        );
-                        quote!{ Self::#variant_ident ( #( #field_idents , )* ) => {
-                            write!(f, concat!("::", #variant_str))?;
-                            #fields
-                        } }
-                    },
-
-                    Fields::Unit => quote!{ Self::#variant_ident => {
-                        write!(f, concat!("::", #variant_str))?;
-                    } }
-
-                }
-            });
-            quote!{ match (self) { #( #variants , )* } }
+                    }
+                });
+                quote!{ match (self) { #( #variants , )* } }
+            }
         },
 
         Data::Union(DataUnion { .. }) => quote_spanned!(Span2::call_site() => {
