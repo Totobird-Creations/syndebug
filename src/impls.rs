@@ -242,7 +242,7 @@ where
     fn fmt(&self, f : &mut Formatter<'_>, const_like : bool) -> fmt::Result {
         write!(f, "NonZero::new( ")?;
         <T as SynDebug>::fmt(&self.get(), f, const_like)?;
-        write!(f, ", )")?;
+        write!(f, ", ).unwrap()")?;
         Ok(())
     }
 }
