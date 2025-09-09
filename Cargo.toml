@@ -1,0 +1,14 @@
+[package]
+name = "syndebug"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = [ "syndebug-macros" ]
+
+[lints.rust]
+unused_parens = "allow"
+
+
+[dependencies.syndebug-macros]
+path = "syndebug-macros"
