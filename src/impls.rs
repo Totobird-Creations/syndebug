@@ -135,8 +135,11 @@ where
     T : SynDebug + ?Sized
 {
     fn fmt(&self, f : &mut Formatter<'_>, const_like : bool) -> fmt::Result {
+        if (const_like) { write!(f, "const {{ ")?; }
         write!(f, "&")?;
-        <T as SynDebug>::fmt(*self, f, const_like)
+        <T as SynDebug>::fmt(*self, f, const_like)?;
+        if (const_like) { write!(f, " }}")?; }
+        Ok(())
     }
 }
 
